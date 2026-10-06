@@ -1,0 +1,55 @@
+# =====================================================================
+# THÔNG TIN NHẠY CẢM — KHÔNG BAO GIỜ COMMIT
+# =====================================================================
+
+# Cấu hình client do `npm run setup` / dashboard tạo ra.
+# Chứa Worker URL và TUNNEL_TOKEN (ai có token này sẽ chiếm được tunnel của bạn).
+data/
+
+# Biến môi trường (TUNNEL_URL, TUNNEL_TOKEN, DASHBOARD_PORT...).
+# Chỉ commit file mẫu .env.example.
+.env
+.env.*
+!.env.example
+
+# Secret cho `wrangler dev` (TUNNEL_TOKEN khi chạy Worker local).
+# Chỉ commit file mẫu .dev.vars.example (dòng "!" phải đứng SAU dòng ignore).
+.dev.vars*
+!.dev.vars.example
+
+# File tạm khi client ghi cấu hình (có thể chứa token).
+*.tmp
+
+# Ghi chú: token trên Cloudflare được lưu bằng `wrangler secret put TUNNEL_TOKEN`,
+# không nằm trong wrangler.toml. Thông tin đăng nhập wrangler nằm trong thư mục
+# người dùng (~/.wrangler), không nằm trong project.
+
+# =====================================================================
+# Wrangler
+# =====================================================================
+
+# Trạng thái local của wrangler / miniflare (cache tài khoản, Durable Object storage khi chạy dev)
+.wrangler/
+
+# Cấu hình wrangler tự sinh khi lỡ chạy `npx wrangler deploy` ở thư mục gốc.
+# Cấu hình thật nằm ở worker/wrangler.toml — xem README, mục "Deploy lại Worker".
+/wrangler.json
+/wrangler.jsonc
+
+# =====================================================================
+# Build / runtime
+# =====================================================================
+
+# Dependencies (worker/package-lock.json VẪN được commit)
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / hệ điều hành
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

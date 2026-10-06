@@ -1,0 +1,24 @@
+# Mini Tunnel — Cloudflare Worker
+# Deploy: npm run setup (từ thư mục gốc) hoặc npx wrangler deploy
+#
+# `name` quyết định địa chỉ public: https://<name>.<subdomain>.workers.dev
+# Đổi tên Worker thì CHỈ sửa dòng này — các tên bên dưới (TUNNEL_HUB, TunnelHub)
+# là tên nội bộ mà code dùng, đổi sẽ làm Worker lỗi.
+name = "toandn"
+main = "src/worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+# Một Durable Object giữ kết nối WebSocket với client local và định tuyến request public.
+# Không đổi: code đọc binding qua env.TUNNEL_HUB và export class TunnelHub.
+[[durable_objects.bindings]]
+name = "TUNNEL_HUB"
+class_name = "TunnelHub"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TunnelHub"]
+
+# Token xác thực client KHÔNG nằm ở đây. Đặt bằng:
+#   npx wrangler secret put TUNNEL_TOKEN
+# Khi chạy local (wrangler dev) dùng file .dev.vars, xem .dev.vars.example

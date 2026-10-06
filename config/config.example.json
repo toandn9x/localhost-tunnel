@@ -1,0 +1,31 @@
+{
+  "relayUrl": "https://mini-tunnel.ten-ban.workers.dev",
+  "token": "dan-token-vao-day-hoac-dung-bien-moi-truong-TUNNEL_TOKEN",
+  "dashboard": { "port": 8787 },
+  "tunnels": [
+    {
+      "id": "crm",
+      "name": "CRM",
+      "protocol": "http",
+      "localScheme": "http",
+      "localHost": "127.0.0.1",
+      "localPort": 8001,
+      "route": "root",
+      "hostname": "",
+      "hostHeader": "rewrite",
+      "enabled": true
+    },
+    {
+      "id": "api",
+      "name": "API",
+      "protocol": "http",
+      "localScheme": "http",
+      "localHost": "127.0.0.1",
+      "localPort": 3000,
+      "route": "path",
+      "hostname": "",
+      "hostHeader": "rewrite",
+      "enabled": true
+    }
+  ]
+}

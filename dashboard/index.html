@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mini Tunnel</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M3 20v-9a9 9 0 0 1 18 0v9"/><path d="M7.5 20v-8.5a4.5 4.5 0 0 1 9 0V20"/><path d="M1.5 20h21"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m4 17 6-6-6-6M12 19h8"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <span class="brand-mark"><svg class="i"><use href="#i-logo"/></svg></span>
+        <div>
+          <div class="brand-name">Mini Tunnel</div>
+          <div class="brand-sub">Public ứng dụng local qua Cloudflare Worker</div>
+        </div>
+      </div>
+      <button class="conn-pill" id="connPill" data-action="settings" title="Cài đặt kết nối Worker">
+        <span class="dot"></span>
+        <span id="connLabel">Đang tải…</span>
+        <span class="conn-extra" id="connExtra"></span>
+        <svg class="i sm"><use href="#i-sliders"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="client-down" id="clientDown" hidden>
+    <div class="wrap">
+      <svg class="i"><use href="#i-alert"/></svg>
+      <span>Không liên lạc được với client local. Hãy chắc chắn cửa sổ chạy <code>npm start</code> vẫn đang mở — trang sẽ tự kết nối lại.</span>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <!-- Kết nối có vấn đề -->
+    <section class="banner" id="banner" hidden>
+      <svg class="i"><use href="#i-alert"/></svg>
+      <div class="banner-body">
+        <strong id="bannerTitle"></strong>
+        <p id="bannerText"></p>
+      </div>
+      <div class="banner-actions">
+        <button class="btn sm" data-action="reconnect">Kết nối lại ngay</button>
+        <button class="btn sm ghost" data-action="settings">Sửa kết nối</button>
+      </div>
+    </section>
+
+    <!-- Chưa cấu hình -->
+    <section class="card onboarding" id="onboarding" hidden>
+      <h2>Bắt đầu trong 2 bước</h2>
+      <p class="muted">Mini Tunnel cần một Cloudflare Worker (miễn phí) làm địa chỉ public. Máy bạn chỉ cần kết nối ra ngoài — không mở port, không cần IP tĩnh.</p>
+      <ol class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Tạo Worker trên Cloudflare</strong>
+            <p class="muted">Mở một cửa sổ terminal mới trong thư mục dự án và chạy lệnh dưới. Lệnh sẽ mở trình duyệt để đăng nhập Cloudflare, deploy Worker, tạo token và tự điền vào đây.</p>
+            <div class="cmd"><svg class="i sm"><use href="#i-terminal"/></svg><code>npm run setup</code><button class="btn sm ghost" data-action="copy-text" data-text="npm run setup"><svg class="i sm"><use href="#i-copy"/></svg>Sao chép</button></div>
+            <p class="muted small">Đã có Worker? <a href="#" data-action="settings">Nhập Worker URL và token thủ công</a>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Thêm tunnel</strong>
+            <p class="muted">Chọn cổng của ứng dụng đang chạy trên máy (ví dụ <code>8001</code>) — bạn sẽ nhận được một địa chỉ <code>https://</code> để gửi cho người khác.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Tổng quan -->
+    <section class="summary" id="summary" hidden>
+      <div class="tile"><span class="tile-label">Tunnel đang chạy</span><span class="tile-value" id="sumOnline">0</span></div>
+      <div class="tile"><span class="tile-label">Tổng request</span><span class="tile-value" id="sumRequests">0</span></div>
+      <div class="tile"><span class="tile-label">Kết nối đang mở</span><span class="tile-value" id="sumActive">0</span></div>
+      <div class="tile"><span class="tile-label">Dữ liệu nhận / gửi</span><span class="tile-value" id="sumBytes">0</span></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Tunnel</h2>
+        <button class="btn primary" data-action="add"><svg class="i sm"><use href="#i-plus"/></svg>Thêm tunnel</button>
+      </div>
+      <div class="tunnel-list" id="tunnelList"></div>
+      <div class="card empty" id="emptyState" hidden>
+        <div class="flow-illus">
+          <span class="node"><svg class="i"><use href="#i-monitor"/></svg>localhost:8001</span>
+          <svg class="i arrow"><use href="#i-arrow"/></svg>
+          <span class="node"><svg class="i"><use href="#i-cloud"/></svg>Cloudflare</span>
+          <svg class="i arrow"><use href="#i-arrow"/></svg>
+          <span class="node">https://…workers.dev</span>
+        </div>
+        <h3>Chưa có tunnel nào</h3>
+        <p class="muted">Tạo tunnel để người khác truy cập ứng dụng đang chạy trên máy bạn.</p>
+        <button class="btn primary" data-action="add"><svg class="i sm"><use href="#i-plus"/></svg>Thêm tunnel đầu tiên</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div class="tabs" role="tablist">
+          <button class="tab active" role="tab" data-tab="requests">Request gần đây</button>
+          <button class="tab" role="tab" data-tab="logs">Nhật ký</button>
+        </div>
+        <div class="tools">
+          <select id="filterTunnel" aria-label="Lọc theo tunnel"><option value="">Tất cả tunnel</option></select>
+          <button class="btn sm ghost" data-action="clear-activity">Xóa</button>
+        </div>
+      </div>
+      <div class="card activity">
+        <div id="requestsView">
+          <div class="table-wrap">
+            <table class="requests">
+              <thead><tr><th>Thời gian</th><th>Tunnel</th><th>Request</th><th>Kết quả</th><th class="num">Thời lượng</th><th class="num">Dung lượng</th></tr></thead>
+              <tbody id="requestRows"></tbody>
+            </table>
+          </div>
+          <p class="empty-sm" id="requestsEmpty">Chưa có request nào. Mở địa chỉ public của một tunnel để thấy request hiện ở đây.</p>
+        </div>
+        <div id="logsView" hidden>
+          <ol class="logs" id="logRows"></ol>
+          <p class="empty-sm" id="logsEmpty">Chưa có nhật ký.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer muted small">
+      <span id="footerVersion"></span> · Dashboard chỉ truy cập được từ máy này (127.0.0.1)
+    </footer>
+  </main>
+
+  <!-- Thêm / sửa tunnel -->
+  <dialog id="tunnelDialog" class="modal">
+    <form id="tunnelForm" method="dialog" novalidate>
+      <header class="modal-head">
+        <h2 id="tunnelDialogTitle">Thêm tunnel</h2>
+        <button type="button" class="btn icon ghost" data-close aria-label="Đóng"><svg class="i"><use href="#i-x"/></svg></button>
+      </header>
+
+      <div class="modal-body">
+        <fieldset class="field">
+          <legend>Loại tunnel</legend>
+          <div class="seg">
+            <label><input type="radio" name="protocol" value="http" checked><span>HTTP / HTTPS / WebSocket</span></label>
+            <label class="disabled" title="Cần VPS relay — sẽ có ở phase sau"><input type="radio" name="protocol" value="tcp" disabled><span>TCP <em>cần VPS</em></span></label>
+            <label class="disabled" title="Cần VPS relay — sẽ có ở phase sau"><input type="radio" name="protocol" value="udp" disabled><span>UDP <em>cần VPS</em></span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="label" for="fPort">Ứng dụng của bạn đang chạy ở đâu?</label>
+          <div class="local-row">
+            <select name="localScheme" id="fScheme" aria-label="Giao thức local">
+              <option value="http">http://</option>
+              <option value="https">https://</option>
+            </select>
+            <input name="localHost" id="fHost" value="127.0.0.1" autocomplete="off" spellcheck="false" aria-label="Địa chỉ local">
+            <span class="colon">:</span>
+            <input name="localPort" id="fPort" inputmode="numeric" placeholder="8001" autocomplete="off" aria-label="Cổng local">
+          </div>
+          <div class="chips" id="portChips">
+            <span class="muted small">Cổng hay dùng:</span>
+            <button type="button" class="chip" data-port="3000">3000</button>
+            <button type="button" class="chip" data-port="5173">5173</button>
+            <button type="button" class="chip" data-port="8000">8000</button>
+            <button type="button" class="chip" data-port="8001">8001</button>
+            <button type="button" class="chip" data-port="8080">8080</button>
+          </div>
+          <p class="check" id="localCheck"></p>
+          <p class="error" data-error="localPort"></p>
+          <p class="error" data-error="localHost"></p>
+        </div>
+
+        <div class="field two">
+          <div>
+            <label class="label" for="fName">Tên hiển thị</label>
+            <input name="name" id="fName" maxlength="60" autocomplete="off" placeholder="VD: CRM">
+            <p class="error" data-error="name"></p>
+          </div>
+          <div>
+            <label class="label" for="fId">Mã tunnel <span class="muted small">(dùng trong URL)</span></label>
+            <input name="id" id="fId" maxlength="40" autocomplete="off" spellcheck="false" placeholder="crm">
+            <p class="error" data-error="id"></p>
+          </div>
+        </div>
+
+        <fieldset class="field">
+          <legend class="label">Địa chỉ public</legend>
+          <div class="route-options">
+            <label class="route">
+              <input type="radio" name="route" value="root">
+              <span class="route-body">
+                <strong>Địa chỉ chính</strong>
+                <code class="route-url" data-preview="root"></code>
+                <span class="muted small">Gọn nhất, hợp với mọi web app. Chỉ một tunnel được dùng địa chỉ này.</span>
+                <span class="note small" id="rootNote" hidden></span>
+              </span>
+            </label>
+            <label class="route">
+              <input type="radio" name="route" value="path">
+              <span class="route-body">
+                <strong>Đường dẫn riêng</strong>
+                <code class="route-url" data-preview="path"></code>
+                <span class="muted small">Chạy nhiều tunnel cùng lúc. Hợp với API; web app dùng đường dẫn tuyệt đối (<code>/static/…</code>) có thể bị lỗi.</span>
+              </span>
+            </label>
+            <label class="route">
+              <input type="radio" name="route" value="host">
+              <span class="route-body">
+                <strong>Tên miền riêng</strong>
+                <input name="hostname" id="fHostname" placeholder="crm.example.com" autocomplete="off" spellcheck="false">
+                <span class="muted small">Tên miền phải nằm trên Cloudflare và được gắn vào Worker: Workers &amp; Pages → <em id="workerName">tên Worker</em> → Settings → Domains &amp; Routes → Add Custom Domain.</span>
+                <span class="error" data-error="hostname"></span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <details class="advanced">
+          <summary>Tùy chọn nâng cao</summary>
+          <fieldset class="field">
+            <legend class="label">Host header gửi tới ứng dụng local</legend>
+            <label class="radio"><input type="radio" name="hostHeader" value="rewrite" checked> Đổi thành địa chỉ local <span class="muted small">(khuyên dùng — Vite, webpack, Django… chặn host lạ)</span></label>
+            <label class="radio"><input type="radio" name="hostHeader" value="preserve"> Giữ nguyên tên miền public <span class="muted small">(cho app cần biết domain thật)</span></label>
+          </fieldset>
+        </details>
+
+        <label class="checkbox"><input type="checkbox" name="enabled" checked> Bật tunnel ngay sau khi lưu</label>
+
+        <div class="preview" id="formPreview"></div>
+        <p class="error" data-error="_"></p>
+      </div>
+
+      <footer class="modal-foot">
+        <button type="button" class="btn ghost" data-close>Hủy</button>
+        <button type="submit" class="btn primary" id="tunnelSubmit">Lưu tunnel</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Cài đặt kết nối -->
+  <dialog id="settingsDialog" class="modal">
+    <form id="settingsForm" method="dialog" novalidate>
+      <header class="modal-head">
+        <h2>Kết nối Cloudflare Worker</h2>
+        <button type="button" class="btn icon ghost" data-close aria-label="Đóng"><svg class="i"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="modal-body">
+        <p class="muted">Chưa có Worker? Chạy <code>npm run setup</code> trong thư mục dự án — lệnh này tự điền 2 ô dưới đây.</p>
+        <div class="field">
+          <label class="label" for="sUrl">Worker URL</label>
+          <input name="relayUrl" id="sUrl" placeholder="https://mini-tunnel.ten-ban.workers.dev" autocomplete="off" spellcheck="false">
+          <p class="hint" id="sUrlEnv" hidden>Đang dùng biến môi trường <code>TUNNEL_URL</code>; giá trị lưu ở đây chỉ có hiệu lực khi bỏ biến đó.</p>
+          <p class="error" data-error="relayUrl"></p>
+        </div>
+        <div class="field">
+          <label class="label" for="sToken">Token</label>
+          <div class="input-btn">
+            <input name="token" id="sToken" type="password" autocomplete="off" spellcheck="false">
+            <button type="button" class="btn ghost icon" data-action="toggle-token" aria-label="Hiện token"><svg class="i sm"><use href="#i-eye"/></svg></button>
+          </div>
+          <p class="hint">Phải trùng với secret <code>TUNNEL_TOKEN</code> của Worker. Token không bao giờ được hiển thị lại trên dashboard.</p>
+          <p class="hint" id="sTokenEnv" hidden>Đang dùng biến môi trường <code>TUNNEL_TOKEN</code>.</p>
+          <p class="error" data-error="token"></p>
+        </div>
+        <div class="test-result" id="testResult" hidden></div>
+        <p class="hint small">File cấu hình: <code id="configPath"></code></p>
+      </div>
+      <footer class="modal-foot">
+        <button type="button" class="btn ghost" data-action="test-settings">Kiểm tra</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" data-close>Hủy</button>
+        <button type="submit" class="btn primary">Lưu &amp; kết nối</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Xác nhận -->
+  <dialog id="confirmDialog" class="modal small">
+    <form method="dialog">
+      <div class="modal-body">
+        <h2 id="confirmTitle"></h2>
+        <p class="muted" id="confirmText"></p>
+      </div>
+      <footer class="modal-foot">
+        <button value="cancel" class="btn ghost">Hủy</button>
+        <button value="ok" class="btn danger" id="confirmOk">Xóa</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <template id="tplTunnel">
+    <article class="card tunnel">
+      <div class="tunnel-head">
+        <div class="tunnel-title">
+          <h3 data-f="name"></h3>
+          <span class="badge" data-f="status"></span>
+          <span class="muted small" data-f="uptime"></span>
+        </div>
+        <label class="switch" title="Bật / dừng tunnel">
+          <input type="checkbox" data-action="toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="flow">
+        <div class="endpoint">
+          <span class="ep-label"><svg class="i sm"><use href="#i-monitor"/></svg>Máy của bạn</span>
+          <code class="ep-url" data-f="local"></code>
+          <span class="ep-state" data-f="localState"></span>
+        </div>
+        <svg class="i flow-arrow"><use href="#i-arrow"/></svg>
+        <div class="endpoint public">
+          <span class="ep-label"><svg class="i sm"><use href="#i-cloud"/></svg><span data-f="routeLabel"></span></span>
+          <a class="ep-url" data-f="public" target="_blank" rel="noopener"></a>
+          <span class="ep-actions">
+            <button class="btn sm ghost" data-action="copy"><svg class="i sm"><use href="#i-copy"/></svg>Sao chép</button>
+            <a class="btn sm ghost" data-f="open" target="_blank" rel="noopener"><svg class="i sm"><use href="#i-external"/></svg>Mở</a>
+          </span>
+        </div>
+      </div>
+
+      <p class="hint-line" data-f="hint"></p>
+
+      <div class="tunnel-foot">
+        <div class="stats">
+          <span><b data-f="requests">0</b> request</span>
+          <span><b data-f="active">0</b> đang mở</span>
+          <span title="Dữ liệu nhận từ Internet (RX)">↓ <b data-f="rx">0 B</b></span>
+          <span title="Dữ liệu gửi ra Internet (TX)">↑ <b data-f="tx">0 B</b></span>
+        </div>
+        <div class="actions">
+          <button class="btn sm ghost" data-action="logs" title="Xem nhật ký"><svg class="i sm"><use href="#i-list"/></svg>Nhật ký</button>
+          <button class="btn sm ghost" data-action="restart" title="Ngắt các kết nối đang mở và chạy lại"><svg class="i sm"><use href="#i-restart"/></svg>Khởi động lại</button>
+          <button class="btn sm ghost" data-action="edit"><svg class="i sm"><use href="#i-edit"/></svg>Sửa</button>
+          <button class="btn sm ghost danger-text" data-action="delete"><svg class="i sm"><use href="#i-trash"/></svg>Xóa</button>
+        </div>
+      </div>
+      <p class="last-error" data-f="lastError" hidden></p>
+    </article>
+  </template>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
