@@ -36,4 +36,3 @@ Mở http://127.0.0.1:8787, bấm **Thêm tunnel**, nhập cổng của ứng d�
 
 - **Đổi tên Worker (cũng là địa chỉ public):** chỉ sửa dòng `name` trong `worker/wrangler.toml`, sau đó chạy lại `npm run setup`.
 - **Deploy lại sau khi sửa code Worker:** chạy `npm run deploy`. Đừng chạy `npx wrangler deploy` ở thư mục gốc.
-- **Không commit token:** `data/` và `.env` chứa token và đã có trong `.gitignore`.
