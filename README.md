@@ -154,8 +154,6 @@ $env:TUNNEL_URL="http://127.0.0.1:8788"; $env:TUNNEL_TOKEN="dev-token-change-me"
 
 Hoặc ghi hai biến này vào file `.env` ở thư mục gốc; file này không bị commit.
 
-## Đưa lên Git và dùng trên máy khác
-
 Repo **không chứa thông tin nhạy cảm**. [.gitignore](.gitignore) đã loại các file sau:
 
 | Không commit | Chứa gì |
